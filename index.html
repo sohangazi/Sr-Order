@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ডাল গ্রুপ ম্যানেজমেন্ট সিস্টেম</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Noto Sans Bengali', 'Hind Siliguri', Tahoma, sans-serif; }
+body { background: #f0f2f5; color: #333; padding: 15px; }
+.container { max-width: 1400px; margin: 0 auto; }
+
+/* ============ HEADER ============ */
+header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px 24px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 14px;
+}
+.header-title h1 { font-size: 22px; color: white; }
+.header-title p { opacity: 0.9; margin-top: 5px; font-size: 13px; }
+
+.header-user-fields {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.user-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.user-field label {
+    font-size: 11px;
+    color: rgba(255,255,255,0.85);
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+.user-field input {
+    padding: 8px 12px;
+    border: 1.5px solid rgba(255,255,255,0.35);
+    border-radius: 7px;
+    background: rgba(255,255,255,0.15);
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    min-width: 170px;
+    transition: all 0.2s;
+}
+.user-field input::placeholder {
+    color: rgba(255,255,255,0.55);
+    font-weight: 400;
+}
+.user-field input:focus {
+    outline: none;
+    background: rgba(255,255,255,0.25);
+    border-color: rgba(255,255,255,0.8);
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.15);
+}
+
+.user-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: white;
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+.tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.tab-btn { padding: 10px 18px; background: white; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s; }
+.tab-btn:hover { background: #f0f0f0; }
+.tab-btn.active { background: #667eea; color: white; border-color: #667eea; }
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+.card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.card h2 { font-size: 17px; margin-bottom: 15px; color: #444; border-bottom: 2px solid #667eea; padding-bottom: 8px; }
+
+.form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 12px; }
+.form-group { display: flex; flex-direction: column; }
+.form-group label { font-size: 13px; font-weight: 600; margin-bottom: 5px; color: #555; }
+.form-group input, .form-group select { padding: 10px; border: 1.5px solid #ddd; border-radius: 6px; font-size: 14px; }
+.form-group input:focus, .form-group select:focus { outline: none; border-color: #667eea; }
+
+.btn { padding: 10px 18px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; }
+.btn-primary { background: #667eea; color: white; }
+.btn-primary:hover { background: #5568d3; }
+.btn-success { background: #28a745; color: white; }
+.btn-success:hover { background: #218838; }
+.btn-danger { background: #dc3545; color: white; }
+.btn-warning { background: #ffc107; color: #333; }
+.btn-info { background: #17a2b8; color: white; }
+.btn-secondary { background: #6c757d; color: white; }
+.btn-sm { padding: 6px 10px; font-size: 12px; }
+
+table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+table th, table td { padding: 10px; text-align: left; border-bottom: 1px solid #eee; }
+table th { background: #f8f9fa; font-weight: 700; color: #555; font-size: 12px; }
+table tr:hover { background: #f9f9f9; }
+
+.summary-box { background: #f8f9ff; border-left: 4px solid #667eea; padding: 15px; border-radius: 6px; margin-top: 15px; }
+.summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-top: 10px; }
+.summary-item { background: white; padding: 10px; border-radius: 6px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.summary-item .label { font-size: 11px; color: #777; }
+.summary-item .value { font-size: 16px; font-weight: 700; color: #667eea; margin-top: 5px; }
+
+.alert { padding: 10px 15px; border-radius: 6px; margin-bottom: 10px; font-size: 14px; }
+.alert-info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+
+.badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+.badge-success { background: #d4edda; color: #155724; }
+.badge-danger { background: #f8d7da; color: #721c24; }
+.badge-warning { background: #fff3cd; color: #856404; }
+.badge-info { background: #d1ecf1; color: #0c5460; }
+
+.actions { display: flex; gap: 5px; flex-wrap: wrap; }
+.empty-state { text-align: center; padding: 30px; color: #999; }
+
+.product-selector-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; margin-top: 15px; }
+.product-card { background: #fff; border: 2px solid #e8eaf0; border-radius: 12px; padding: 15px; transition: all 0.25s; }
+.product-card:hover { border-color: #c5cbe0; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1); }
+.product-card.selected { border-color: #667eea; background: linear-gradient(135deg, #f8f9ff 0%, #eef1ff 100%); box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2); }
+.product-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed #e0e0e0; }
+.product-card-title { font-weight: 700; font-size: 15px; color: #333; display: flex; align-items: center; gap: 8px; }
+.product-card-type { font-size: 11px; padding: 3px 8px; border-radius: 20px; background: #e8ecff; color: #667eea; font-weight: 600; }
+.product-card-type.dojon { background: #fff3cd; color: #856404; }
+.product-conversion-info { background: #f5f7ff; border-radius: 8px; padding: 8px 10px; margin-bottom: 12px; font-size: 12px; color: #555; line-height: 1.6; }
+.product-conversion-info strong { color: #667eea; }
+.product-card-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+.product-card-label { font-size: 11px; font-weight: 600; color: #777; margin-bottom: 3px; display: block; }
+.product-card-input { width: 100%; padding: 8px 10px; border: 1.5px solid #d8dbe5; border-radius: 6px; font-size: 13px; font-weight: 600; color: #333; background: white; }
+.product-card-input:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+.product-card-input.price-input { background: #fffef5; border-color: #ffd966; }
+.product-card-input.price-input:focus { border-color: #f0ad4e; }
+.product-card-input.total-value { background: #eef1ff; color: #667eea; font-weight: 700; }
+.product-card-stock-info { font-size: 11px; color: #666; display: flex; justify-content: space-between; margin-top: 8px; padding-top: 8px; border-top: 1px dashed #e0e0e0; }
+.product-card-stock-info span strong { color: #667eea; }
+.product-card-checkbox { width: 20px; height: 20px; cursor: pointer; accent-color: #667eea; }
+
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; padding: 20px; overflow: auto; }
+.modal-overlay.active { display: flex; align-items: flex-start; justify-content: center; }
+.modal-box { background: white; border-radius: 12px; max-width: 480px; width: 100%; padding: 22px; margin-top: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+.modal-box h3 { margin-bottom: 15px; color: #333; font-size: 17px; padding-bottom: 10px; border-bottom: 2px solid #667eea; }
+.modal-box .form-group { margin-bottom: 12px; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
+
+.loading-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; }
+.loading-overlay.active { display: flex; }
+.loading-box { background: white; padding: 25px 35px; border-radius: 12px; text-align: center; }
+.spinner { display: inline-block; width: 40px; height: 40px; border: 4px solid #e0e0e0; border-top-color: #667eea; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ================= PDF RENDER CONTAINER (offscreen) ================= */
+.pdf-render-container {
+    position: fixed;
+    left: -10000px;
+    top: 0;
+    width: 794px;
+    background: white;
+    padding: 0;
+    font-family: 'Noto Sans Bengali', 'Hind Siliguri', 'Segoe UI', sans-serif;
+    color: #222;
+}
+.pdf-invoice { background: white; color: #222; font-family: 'Noto Sans Bengali', 'Hind Siliguri', 'Segoe UI', sans-serif; }
+.pdf-invoice * { font-family: 'Noto Sans Bengali', 'Hind Siliguri', 'Segoe UI', sans-serif; }
+
+.pdf-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 22px 30px;
+}
+.pdf-header.green { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
+.pdf-header h1 { font-size: 22px; margin: 0; color: white; font-weight: 700; }
+
+/* Header with user info */
+.pdf-header-with-user {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 18px 30px 16px;
+}
+.pdf-header-with-user.green { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
+.pdf-header-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.25);
+}
+.pdf-header-top-row h1 {
+    font-size: 22px;
+    margin: 0;
+    color: white;
+    font-weight: 700;
+}
+.pdf-user-block {
+    text-align: right;
+    color: white;
+    font-size: 13px;
+    line-height: 1.5;
+}
+.pdf-user-block .user-line {
+    display: block;
+}
+.pdf-user-block .user-line strong {
+    color: rgba(255,255,255,0.9);
+    font-weight: 600;
+    margin-right: 4px;
+}
+.pdf-user-block .user-line span {
+    color: white;
+    font-weight: 700;
+}
+
+.pdf-body { padding: 24px 30px; }
+.pdf-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 20px;
+    margin-bottom: 18px;
+    font-size: 14px;
+    color: #333;
+}
+.pdf-info-grid div { padding: 4px 0; }
+.pdf-info-grid strong { color: #555; }
+
+.pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 13px; }
+.pdf-table thead th {
+    background: #667eea;
+    color: white;
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 13px;
+}
+.pdf-table.green thead th { background: #28a745; }
+.pdf-table tbody td { padding: 9px 12px; border-bottom: 1px solid #e0e0e0; }
+.pdf-table tbody tr:nth-child(even) { background: #f8f9fc; }
+.pdf-table .text-right { text-align: right; }
+.pdf-table .text-center { text-align: center; }
+
+.pdf-totals { margin-left: auto; width: 320px; margin-top: 10px; font-size: 14px; }
+.pdf-totals-row { display: flex; justify-content: space-between; padding: 6px 12px; border-bottom: 1px solid #eee; }
+.pdf-totals-row.grand {
+    border-top: 2px solid #667eea;
+    border-bottom: 2px solid #667eea;
+    background: #f0f4ff;
+    font-size: 16px;
+    font-weight: 700;
+    color: #4a5bb8;
+    padding: 10px 12px;
+    margin-top: 4px;
+}
+
+.pdf-summary-box { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+.pdf-summary-item { background: #f0f4ff; border-left: 4px solid #667eea; padding: 12px; border-radius: 6px; text-align: center; }
+.pdf-summary-item .lbl { font-size: 12px; color: #666; }
+.pdf-summary-item .val { font-size: 18px; font-weight: 700; color: #4a5bb8; margin-top: 4px; }
+.pdf-section-title { font-size: 15px; font-weight: 700; color: #333; margin: 18px 0 8px; padding-bottom: 6px; border-bottom: 2px solid #e0e0e0; }
+.pdf-footer { text-align: center; color: #888; font-size: 12px; padding: 15px 30px 25px; border-top: 1px solid #eee; margin-top: 20px; }
+
+@media (max-width: 700px) {
+    .product-selector-grid { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+    .summary-grid { grid-template-columns: 1fr 1fr; }
+    .user-field input { min-width: 130px; }
+    .header-top { flex-direction: column; align-items: stretch; }
+    .header-user-fields { width: 100%; }
+    .user-field { flex: 1; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <div class="header-top">
+            <div class="header-title">
+                <h1>📦 ডাল গ্রুপ ম্যানেজমেন্ট সিস্টেম</h1>
+                <p>সিনিয়র (SR) পদের জন্য অর্ডার, স্টক ও রিপোর্ট ম্যানেজমেন্ট</p>
+            </div>
+            <div class="header-user-fields">
+                <div class="user-field">
+                    <label>👤 SR নাম</label>
+                    <input type="text" id="srName" placeholder="আপনার নাম লিখুন" maxlength="40">
+                </div>
+                <div class="user-field">
+                    <label>📍 জোন</label>
+                    <input type="text" id="zoneName" placeholder="যেমন: ঢাকা-উত্তর" maxlength="40">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('order')">🛒 অর্ডার</button>
+        <button class="tab-btn" onclick="switchTab('products')">📋 প্রোডাক্ট</button>
+        <button class="tab-btn" onclick="switchTab('stock')">📊 স্টক</button>
+        <button class="tab-btn" onclick="switchTab('daily')">📅 দৈনিক সামারি</button>
+        <button class="tab-btn" onclick="switchTab('allorders')">📁 সব অর্ডার</button>
+    </div>
+
+    <!-- ORDER TAB -->
+    <div id="order-tab" class="tab-content active">
+        <div class="card">
+            <h2>🛒 নতুন অর্ডার তৈরি করুন</h2>
+            <div class="form-row">
+                <div class="form-group"><label>অর্ডার তারিখ</label><input type="date" id="orderDate"></div>
+                <div class="form-group"><label>ক্রেতার নাম</label><input type="text" id="customerName" placeholder="ক্রেতার নাম লিখুন"></div>
+                <div class="form-group"><label>মোবাইল নম্বর</label><input type="text" id="customerPhone" placeholder="মোবাইল"></div>
+                <div class="form-group"><label>ঠিকানা</label><input type="text" id="customerAddress" placeholder="ঠিকানা"></div>
+            </div>
+
+            <h3 style="margin: 15px 0 5px; font-size: 15px; color: #555;">প্রোডাক্ট নির্বাচন করুন:</h3>
+            <div id="productSelector" class="product-selector-grid"></div>
+
+            <div class="summary-box">
+                <strong>অর্ডার সামারি:</strong>
+                <div class="summary-grid">
+                    <div class="summary-item"><div class="label">সাবটোটাল</div><div class="value" id="subTotal">৳০</div></div>
+                    <div class="summary-item"><div class="label">ছাড় (%)</div><input type="number" id="discountInput" value="0" min="0" max="100" style="width: 100%; text-align: center; padding: 3px; border: 1px solid #ddd; border-radius: 4px;"></div>
+                    <div class="summary-item"><div class="label">ছাড়ের পর</div><div class="value" id="afterDiscount">৳০</div></div>
+                    <div class="summary-item"><div class="label">ভ্যাট (%)</div><input type="number" id="vatInput" value="0" min="0" max="100" style="width: 100%; text-align: center; padding: 3px; border: 1px solid #ddd; border-radius: 4px;"></div>
+                    <div class="summary-item"><div class="label">সর্বমোট</div><div class="value" id="grandTotal">৳০</div></div>
+                </div>
+            </div>
+
+            <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn btn-success" onclick="saveOrder()">💾 অর্ডার সেভ করুন</button>
+                <button class="btn btn-warning" onclick="resetOrderForm()">🔄 রিসেট</button>
+                <button class="btn btn-info" onclick="printCurrentOrder()">🖨️ প্রিন্ট / PDF</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📋 বর্তমান অর্ডারের আইটেম</h2>
+            <div id="currentOrderItems"><div class="empty-state">এখনো কোনো আইটেম যোগ করা হয়নি</div></div>
+        </div>
+    </div>
+
+    <!-- PRODUCTS TAB -->
+    <div id="products-tab" class="tab-content">
+        <div class="card">
+            <h2 id="productFormTitle">➕ নতুন প্রোডাক্ট যোগ করুন</h2>
+            <div class="form-row">
+                <div class="form-group"><label>প্রোডাক্টের নাম *</label><input type="text" id="pName" placeholder="যেমন: জিরোস ১০"></div>
+                <div class="form-group">
+                    <label>প্যাকেজিং টাইপ *</label>
+                    <select id="pType" onchange="toggleProductFields()">
+                        <option value="পলি">পলি (বস্তা সহ)</option>
+                        <option value="ডজন">ডজন (কার্টুন সহ)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row" id="polyRow">
+                <div class="form-group"><label>১ পলিতে কত পিস? *</label><input type="number" id="pPiecesPerPoly" placeholder="যেমন: 20" value="20"></div>
+                <div class="form-group"><label>১ বস্তায় কত পলি? *</label><input type="number" id="pPerBag" placeholder="যেমন: 6" value="6"></div>
+            </div>
+            <div class="form-row" id="dojonRow" style="display:none;">
+                <div class="form-group"><label>১ ডজনে কত পিস? *</label><input type="number" id="pPiecesPerDojon" placeholder="যেমন: 12" value="12"></div>
+                <div class="form-group"><label>১ কার্টুনে কত ডজন? *</label><input type="number" id="pPerCarton" placeholder="যেমন: 2" value="2"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>প্রতি পলি/ডজনের দাম (৳) *</label><input type="number" id="pPrice" placeholder="যেমন: 160" step="0.01"></div>
+                <div class="form-group"><label>স্টক (মোট পলি/ডজন) *</label><input type="number" id="pStock" placeholder="যেমন: 100"></div>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn btn-primary" id="productSubmitBtn" onclick="saveProduct()">➕ প্রোডাক্ট যোগ করুন</button>
+                <button class="btn btn-secondary" id="productCancelBtn" style="display:none;" onclick="cancelEditProduct()">✖ বাতিল</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📋 প্রোডাক্ট তালিকা</h2>
+            <div id="productList"></div>
+        </div>
+    </div>
+
+    <!-- STOCK TAB -->
+    <div id="stock-tab" class="tab-content">
+        <div class="card"><h2>📊 বর্তমান স্টক</h2><div id="stockList"></div></div>
+    </div>
+
+    <!-- DAILY SUMMARY TAB -->
+    <div id="daily-tab" class="tab-content">
+        <div class="card">
+            <h2>📅 দৈনিক সামারি</h2>
+            <div class="form-row">
+                <div class="form-group"><label>তারিখ নির্বাচন করুন</label><input type="date" id="dailyDate" onchange="loadDailySummary()"></div>
+                <div class="form-group" style="justify-content: flex-end;">
+                    <button class="btn btn-info" onclick="downloadDailySummaryPDF()">📄 দৈনিক সামারি PDF</button>
+                </div>
+            </div>
+            <div id="dailySummaryContent"></div>
+        </div>
+    </div>
+
+    <!-- ALL ORDERS TAB -->
+    <div id="allorders-tab" class="tab-content">
+        <div class="card">
+            <h2>📁 সংরক্ষিত সব অর্ডার</h2>
+            <div class="form-row">
+                <div class="form-group"><label>ফিল্টার (তারিখ)</label><input type="date" id="filterDate" onchange="loadAllOrders()"></div>
+                <div class="form-group" style="justify-content: flex-end;">
+                    <button class="btn btn-primary" onclick="document.getElementById('filterDate').value=''; loadAllOrders();">সব দেখুন</button>
+                </div>
+            </div>
+            <div id="allOrdersList"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Restock Modal -->
+<div class="modal-overlay" id="restockModal">
+    <div class="modal-box">
+        <h3>📦 স্টক যোগ করুন</h3>
+        <p style="font-size: 13px; color: #666; margin-bottom: 12px;">প্রোডাক্ট: <strong id="restockProductName"></strong></p>
+        <p style="font-size: 13px; color: #666; margin-bottom: 15px;">বর্তমান স্টক: <strong id="restockCurrentStock"></strong></p>
+        <div class="form-group">
+            <label>যোগ করতে চান এমন পরিমাণ</label>
+            <input type="number" id="restockAmount" min="1" placeholder="যেমন: 50" step="1">
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeRestockModal()">বাতিল</button>
+            <button class="btn btn-success" onclick="confirmRestock()">➕ যোগ করুন</button>
+        </div>
+    </div>
+</div>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-box">
+        <div class="spinner"></div>
+        <div id="loadingText" style="font-size:14px; color: #555;">PDF তৈরি হচ্ছে...</div>
+    </div>
+</div>
+
+<div id="pdfRenderContainer" class="pdf-render-container" style="display:none;"></div>
+
+<script>
+// ==================== DATA ====================
+let products = JSON.parse(localStorage.getItem('dg_products_v5') || '[]');
+let orders = JSON.parse(localStorage.getItem('dg_orders_v5') || '[]');
+let userInfo = JSON.parse(localStorage.getItem('dg_userinfo_v1') || '{"srName":"","zoneName":""}');
+let currentOrderItems = [];
+let editingProductId = null;
+let restockTargetId = null;
+
+function saveData() {
+    localStorage.setItem('dg_products_v5', JSON.stringify(products));
+    localStorage.setItem('dg_orders_v5', JSON.stringify(orders));
+}
+function saveUserInfo() {
+    localStorage.setItem('dg_userinfo_v1', JSON.stringify(userInfo));
+}
+
+// ==================== UTIL ====================
+function escapeHtml(s) {
+    return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function fmt(n) { return Number(n || 0).toFixed(2); }
+
+// ==================== PDF GENERATION ====================
+async function buildPdfFromHtml(html, filename) {
+    showLoading('PDF তৈরি হচ্ছে...');
+    await document.fonts.ready;
+    
+    const container = document.getElementById('pdfRenderContainer');
+    container.innerHTML = html;
+    container.style.display = 'block';
+    await new Promise(r => setTimeout(r, 250));
+    
+    try {
+        const canvas = await html2canvas(container, {
+            scale: 2, useCORS: true, backgroundColor: '#ffffff',
+            logging: false, windowWidth: 794, width: 794,
+        });
+        
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const imgWidth = pageWidth;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        
+        let heightLeft = imgHeight;
+        let position = 0;
+        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+        
+        while (heightLeft > 0) {
+            position = heightLeft - imgHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+        }
+        pdf.save(filename);
+    } catch (err) {
+        console.error(err);
+        alert('PDF তৈরি করতে সমস্যা হয়েছে: ' + err.message);
+    } finally {
+        container.style.display = 'none';
+        container.innerHTML = '';
+        hideLoading();
+    }
+}
+
+function showLoading(text) {
+    document.getElementById('loadingText').textContent = text || 'PDF তৈরি হচ্ছে...';
+    document.getElementById('loadingOverlay').classList.add('active');
+}
+function hideLoading() {
+    document.getElementById('loadingOverlay').classList.remove('active');
+}
+
+// ==================== USER INFO HTML (for PDF header) ====================
+function buildUserInfoHtml(theme = '') {
+    const srName = (userInfo.srName || '').trim();
+    const zoneName = (userInfo.zoneName || '').trim();
+    if (!srName && !zoneName) return '';
+    
+    let lines = '';
+    if (srName) lines += `<span class="user-line"><strong>SR:</strong> <span>${escapeHtml(srName)}</span></span>`;
+    if (zoneName) lines += `<span class="user-line"><strong>জোন:</strong> <span>${escapeHtml(zoneName)}</span></span>`;
+    
+    return `<div class="pdf-user-block">${lines}</div>`;
+}
+
+// ==================== INVOICE HTML BUILDER ====================
+function buildOrderInvoiceHtml(order) {
+    const items = order.items.map(i => `
+        <tr>
+            <td>${escapeHtml(i.productName)}</td>
+            <td class="text-center">${i.qty} ${escapeHtml(i.unit)}</td>
+            <td class="text-center">${i.totalBaseUnits} ${escapeHtml(i.productType)}</td>
+            <td class="text-center">${i.totalPieces} পিস</td>
+            <td class="text-right">৳${fmt(i.total)}</td>
+        </tr>
+    `).join('');
+    
+    const afterDisc = order.subTotal * (1 - order.discount / 100);
+    const vatAmt = order.grandTotal - afterDisc;
+    
+    let totalsHtml = `<div class="pdf-totals-row"><span>সাবটোটাল:</span><span>৳${fmt(order.subTotal)}</span></div>`;
+    if (order.discount > 0) {
+        totalsHtml += `<div class="pdf-totals-row"><span>ছাড় (${order.discount}%):</span><span>-৳${fmt(order.subTotal - afterDisc)}</span></div>`;
+    }
+    if (order.vat > 0) {
+        totalsHtml += `<div class="pdf-totals-row"><span>ভ্যাট (${order.vat}%):</span><span>+৳${fmt(vatAmt)}</span></div>`;
+    }
+    totalsHtml += `<div class="pdf-totals-row grand"><span>সর্বমোট:</span><span>৳${fmt(order.grandTotal)}</span></div>`;
+    
+    const userInfoHtml = buildUserInfoHtml();
+    
+    return `
+    <div class="pdf-invoice">
+        <div class="pdf-header-with-user">
+            <div class="pdf-header-top-row">
+                <h1>অর্ডার ইনভয়েস</h1>
+                ${userInfoHtml}
+            </div>
+        </div>
+        <div class="pdf-body">
+            <div class="pdf-info-grid">
+                <div><strong>অর্ডার ID:</strong> ${escapeHtml(order.id)}</div>
+                <div><strong>তারিখ:</strong> ${escapeHtml(order.date)}</div>
+                <div><strong>ক্রেতা:</strong> ${escapeHtml(order.customer)}</div>
+                <div><strong>মোবাইল:</strong> ${escapeHtml(order.phone || 'N/A')}</div>
+                <div style="grid-column: span 2;"><strong>ঠিকানা:</strong> ${escapeHtml(order.address || 'N/A')}</div>
+            </div>
+            
+            <table class="pdf-table">
+                <thead>
+                    <tr>
+                        <th>প্রোডাক্ট</th>
+                        <th class="text-center">পরিমাণ</th>
+                        <th class="text-center">মোট</th>
+                        <th class="text-center">পিস</th>
+                        <th class="text-right">দাম</th>
+                    </tr>
+                </thead>
+                <tbody>${items}</tbody>
+            </table>
+            
+            <div class="pdf-totals">${totalsHtml}</div>
+        </div>
+        <div class="pdf-footer">
+            ধন্যবাদ! আবার আসবেন। &nbsp;|&nbsp; Generated on ${new Date().toLocaleString('bn-BD')}
+        </div>
+    </div>`;
+}
+
+function buildDailySummaryHtml(date, dayOrders) {
+    const totalSales = dayOrders.reduce((s, o) => s + o.grandTotal, 0);
+    const totalPieces = dayOrders.reduce((s, o) => s + o.items.reduce((x, i) => x + (i.totalPieces || 0), 0), 0);
+    
+    const orderRows = dayOrders.map(o => `
+        <tr>
+            <td>${escapeHtml(o.id)}</td>
+            <td>${escapeHtml(o.customer)}</td>
+            <td class="text-center">${o.items.length}</td>
+            <td class="text-right">৳${fmt(o.subTotal)}</td>
+            <td class="text-right"><strong>৳${fmt(o.grandTotal)}</strong></td>
+        </tr>
+    `).join('');
+    
+    const productMap = {};
+    dayOrders.forEach(o => {
+        o.items.forEach(i => {
+            if (!productMap[i.productName]) productMap[i.productName] = { total: 0, units: 0, pieces: 0, type: i.productType };
+            productMap[i.productName].total += i.total;
+            productMap[i.productName].units += i.totalBaseUnits;
+            productMap[i.productName].pieces += (i.totalPieces || 0);
+        });
+    });
+    
+    const productRows = Object.keys(productMap).map(name => `
+        <tr>
+            <td>${escapeHtml(name)}</td>
+            <td class="text-center">${productMap[name].units} ${escapeHtml(productMap[name].type)}</td>
+            <td class="text-center">${productMap[name].pieces} পিস</td>
+            <td class="text-right">৳${fmt(productMap[name].total)}</td>
+        </tr>
+    `).join('');
+    
+    const userInfoHtml = buildUserInfoHtml();
+    
+    return `
+    <div class="pdf-invoice">
+        <div class="pdf-header-with-user green">
+            <div class="pdf-header-top-row">
+                <h1>দৈনিক সামারি রিপোর্ট</h1>
+                ${userInfoHtml}
+            </div>
+        </div>
+        <div class="pdf-body">
+            <div style="font-size:14px; margin-bottom:14px;"><strong>তারিখ:</strong> ${escapeHtml(date)}</div>
+            
+            <div class="pdf-summary-box">
+                <div class="pdf-summary-item">
+                    <div class="lbl">মোট অর্ডার</div>
+                    <div class="val">${dayOrders.length}</div>
+                </div>
+                <div class="pdf-summary-item">
+                    <div class="lbl">মোট বিক্রয়</div>
+                    <div class="val">৳${fmt(totalSales)}</div>
+                </div>
+                <div class="pdf-summary-item">
+                    <div class="lbl">মোট পিস বিক্রি</div>
+                    <div class="val">${totalPieces}</div>
+                </div>
+            </div>
+            
+            <div class="pdf-section-title">অর্ডার তালিকা</div>
+            <table class="pdf-table">
+                <thead>
+                    <tr>
+                        <th>অর্ডার ID</th>
+                        <th>ক্রেতা</th>
+                        <th class="text-center">আইটেম</th>
+                        <th class="text-right">সাবটোটাল</th>
+                        <th class="text-right">সর্বমোট</th>
+                    </tr>
+                </thead>
+                <tbody>${orderRows}</tbody>
+            </table>
+            
+            <div class="pdf-section-title">প্রোডাক্ট ভিত্তিক সামারি</div>
+            <table class="pdf-table green">
+                <thead>
+                    <tr>
+                        <th>প্রোডাক্ট</th>
+                        <th class="text-center">মোট ইউনিট</th>
+                        <th class="text-center">মোট পিস</th>
+                        <th class="text-right">মোট বিক্রয়</th>
+                    </tr>
+                </thead>
+                <tbody>${productRows}</tbody>
+            </table>
+            
+            <div class="pdf-totals">
+                <div class="pdf-totals-row grand">
+                    <span>সর্বমোট বিক্রয়:</span>
+                    <span>৳${fmt(totalSales)}</span>
+                </div>
+            </div>
+        </div>
+        <div class="pdf-footer">
+            রিপোর্ট তৈরি: ${new Date().toLocaleString('bn-BD')}
+        </div>
+    </div>`;
+}
+
+// ==================== PRINT / PDF TRIGGERS ====================
+async function printCurrentOrder() {
+    if (currentOrderItems.length === 0) { alert('প্রিন্ট করার জন্য কোনো আইটেম নেই!'); return; }
+    
+    const subTotal = currentOrderItems.reduce((s, i) => s + i.total, 0);
+    const disc = parseFloat(document.getElementById('discountInput').value) || 0;
+    const vat = parseFloat(document.getElementById('vatInput').value) || 0;
+    const afterDisc = subTotal * (1 - disc / 100);
+    const grand = afterDisc * (1 + vat / 100);
+    
+    const order = {
+        id: 'DRAFT-' + Date.now(),
+        date: document.getElementById('orderDate').value || new Date().toISOString().split('T')[0],
+        customer: document.getElementById('customerName').value || 'N/A',
+        phone: document.getElementById('customerPhone').value || '',
+        address: document.getElementById('customerAddress').value || '',
+        items: currentOrderItems.map(i => ({
+            productName: i.product.name, productType: i.product.type,
+            qty: i.qty, unit: i.unit,
+            totalBaseUnits: i.totalBaseUnits, totalPieces: i.totalPieces, total: i.total
+        })),
+        subTotal, discount: disc, vat, grandTotal: grand
+    };
+    
+    const html = buildOrderInvoiceHtml(order);
+    await buildPdfFromHtml(html, 'order_' + Date.now() + '.pdf');
+}
+
+async function printOrderPDF(orderId) {
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return;
+    const html = buildOrderInvoiceHtml(order);
+    await buildPdfFromHtml(html, 'order_' + order.id + '.pdf');
+}
+
+async function downloadDailySummaryPDF() {
+    const date = document.getElementById('dailyDate').value;
+    if (!date) { alert('তারিখ নির্বাচন করুন!'); return; }
+    const dayOrders = orders.filter(o => o.date === date);
+    if (dayOrders.length === 0) { alert('এই তারিখে কোনো অর্ডার নেই!'); return; }
+    const html = buildDailySummaryHtml(date, dayOrders);
+    await buildPdfFromHtml(html, 'daily_summary_' + date + '.pdf');
+}
+
+// ==================== TAB SWITCHING ====================
+function switchTab(tab) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(tab + '-tab').classList.add('active');
+    event.target.classList.add('active');
+    
+    if (tab === 'products') renderProducts();
+    if (tab === 'stock') renderStock();
+    if (tab === 'daily') {
+        if (!document.getElementById('dailyDate').value)
+            document.getElementById('dailyDate').value = new Date().toISOString().split('T')[0];
+        loadDailySummary();
+    }
+    if (tab === 'allorders') loadAllOrders();
+    if (tab === 'order') renderProductSelector();
+}
+
+// ==================== PRODUCT FORM ====================
+function toggleProductFields() {
+    const type = document.getElementById('pType').value;
+    document.getElementById('polyRow').style.display = type === 'পলি' ? 'grid' : 'none';
+    document.getElementById('dojonRow').style.display = type === 'ডজন' ? 'grid' : 'none';
+}
+
+function saveProduct() {
+    const name = document.getElementById('pName').value.trim();
+    const type = document.getElementById('pType').value;
+    const piecesPerPoly = parseFloat(document.getElementById('pPiecesPerPoly').value) || 0;
+    const perBag = parseFloat(document.getElementById('pPerBag').value) || 0;
+    const piecesPerDojon = parseFloat(document.getElementById('pPiecesPerDojon').value) || 0;
+    const perCarton = parseFloat(document.getElementById('pPerCarton').value) || 0;
+    const price = parseFloat(document.getElementById('pPrice').value) || 0;
+    const stock = parseFloat(document.getElementById('pStock').value) || 0;
+
+    if (!name || price <= 0) { alert('প্রোডাক্টের নাম এবং দাম সঠিকভাবে দিন!'); return; }
+    if (type === 'পলি' && (perBag <= 0 || piecesPerPoly <= 0)) { alert('১ পলিতে পিস এবং ১ বস্তায় পলির সংখ্যা দিন!'); return; }
+    if (type === 'ডজন' && (perCarton <= 0 || piecesPerDojon <= 0)) { alert('১ ডজনে পিস এবং ১ কার্টুনে ডজনের সংখ্যা দিন!'); return; }
+
+    if (editingProductId) {
+        const p = products.find(x => x.id === editingProductId);
+        if (p) Object.assign(p, {
+            name, type,
+            piecesPerPoly: type === 'পলি' ? piecesPerPoly : 0,
+            perBag: type === 'পলি' ? perBag : 0,
+            piecesPerDojon: type === 'ডজন' ? piecesPerDojon : 0,
+            perCarton: type === 'ডজন' ? perCarton : 0,
+            price, stock
+        });
+        alert('✅ প্রোডাক্ট আপডেট হয়েছে!');
+        cancelEditProduct();
+    } else {
+        products.push({
+            id: Date.now(), name, type,
+            piecesPerPoly: type === 'পলি' ? piecesPerPoly : 0,
+            perBag: type === 'পলি' ? perBag : 0,
+            piecesPerDojon: type === 'ডজন' ? piecesPerDojon : 0,
+            perCarton: type === 'ডজন' ? perCarton : 0,
+            price, stock
+        });
+        alert('✅ প্রোডাক্ট যোগ হয়েছে!');
+        clearProductForm();
+    }
+    saveData();
+    renderProducts();
+    renderProductSelector();
+}
+
+function clearProductForm() {
+    document.getElementById('pName').value = '';
+    document.getElementById('pPiecesPerPoly').value = 20;
+    document.getElementById('pPerBag').value = 6;
+    document.getElementById('pPiecesPerDojon').value = 12;
+    document.getElementById('pPerCarton').value = 2;
+    document.getElementById('pPrice').value = '';
+    document.getElementById('pStock').value = '';
+    document.getElementById('pType').value = 'পলি';
+    toggleProductFields();
+}
+
+function editProduct(id) {
+    const p = products.find(x => x.id === id);
+    if (!p) return;
+    editingProductId = id;
+    document.getElementById('pName').value = p.name;
+    document.getElementById('pType').value = p.type;
+    document.getElementById('pPiecesPerPoly').value = p.piecesPerPoly || 20;
+    document.getElementById('pPerBag').value = p.perBag || 6;
+    document.getElementById('pPiecesPerDojon').value = p.piecesPerDojon || 12;
+    document.getElementById('pPerCarton').value = p.perCarton || 2;
+    document.getElementById('pPrice').value = p.price;
+    document.getElementById('pStock').value = p.stock;
+    toggleProductFields();
+    document.getElementById('productFormTitle').textContent = '✏️ প্রোডাক্ট এডিট করুন';
+    document.getElementById('productSubmitBtn').textContent = '💾 আপডেট করুন';
+    document.getElementById('productSubmitBtn').className = 'btn btn-success';
+    document.getElementById('productCancelBtn').style.display = 'inline-block';
+    document.getElementById('products-tab').scrollIntoView({ behavior: 'smooth' });
+}
+
+function cancelEditProduct() {
+    editingProductId = null;
+    clearProductForm();
+    document.getElementById('productFormTitle').textContent = '➕ নতুন প্রোডাক্ট যোগ করুন';
+    document.getElementById('productSubmitBtn').textContent = '➕ প্রোডাক্ট যোগ করুন';
+    document.getElementById('productSubmitBtn').className = 'btn btn-primary';
+    document.getElementById('productCancelBtn').style.display = 'none';
+}
+
+function deleteProduct(id) {
+    if (!confirm('প্রোডাক্ট ডিলিট করতে চান?')) return;
+    products = products.filter(p => p.id !== id);
+    saveData();
+    renderProducts();
+    renderProductSelector();
+    if (editingProductId === id) cancelEditProduct();
+}
+
+function renderProducts() {
+    const div = document.getElementById('productList');
+    if (products.length === 0) { div.innerHTML = '<div class="empty-state">কোনো প্রোডাক্ট নেই</div>'; return; }
+    let html = '<table><thead><tr><th>নাম</th><th>টাইপ</th><th>রূপান্তর</th><th>দাম</th><th>স্টক</th><th>একশন</th></tr></thead><tbody>';
+    products.forEach(p => {
+        const conversion = p.type === 'পলি'
+            ? `১ পলি = ${p.piecesPerPoly} পিস<br>১ বস্তা = ${p.perBag} পলি (${p.perBag * p.piecesPerPoly} পিস)`
+            : `১ ডজন = ${p.piecesPerDojon} পিস<br>১ কার্টুন = ${p.perCarton} ডজন (${p.perCarton * p.piecesPerDojon} পিস)`;
+        html += `<tr>
+            <td><strong>${escapeHtml(p.name)}</strong></td>
+            <td><span class="badge ${p.type === 'পলি' ? 'badge-info' : 'badge-warning'}">${p.type}</span></td>
+            <td style="font-size:12px; line-height:1.6;">${conversion}</td>
+            <td>৳${p.price}</td>
+            <td>${p.stock}</td>
+            <td class="actions">
+                <button class="btn btn-warning btn-sm" onclick="editProduct(${p.id})">✏️</button>
+                <button class="btn btn-success btn-sm" onclick="openRestockModal(${p.id})">📦 স্টক</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteProduct(${p.id})">🗑️</button>
+            </td>
+        </tr>`;
+    });
+    html += '</tbody></table>';
+    div.innerHTML = html;
+}
+
+// ==================== RESTOCK ====================
+function openRestockModal(id) {
+    const p = products.find(x => x.id === id);
+    if (!p) return;
+    restockTargetId = id;
+    document.getElementById('restockProductName').textContent = p.name;
+    document.getElementById('restockCurrentStock').textContent = p.stock + ' ' + p.type;
+    document.getElementById('restockAmount').value = '';
+    document.getElementById('restockModal').classList.add('active');
+    setTimeout(() => document.getElementById('restockAmount').focus(), 100);
+}
+function closeRestockModal() {
+    document.getElementById('restockModal').classList.remove('active');
+    restockTargetId = null;
+}
+function confirmRestock() {
+    if (!restockTargetId) return;
+    const amount = parseFloat(document.getElementById('restockAmount').value) || 0;
+    if (amount <= 0) { alert('সঠিক পরিমাণ দিন!'); return; }
+    const p = products.find(x => x.id === restockTargetId);
+    if (!p) return;
+    p.stock += amount;
+    saveData();
+    closeRestockModal();
+    renderProducts();
+    renderStock();
+    renderProductSelector();
+    alert(`✅ ${p.name} এ ${amount} ${p.type} স্টক যোগ হয়েছে!`);
+}
+
+// ==================== STOCK ====================
+function renderStock() {
+    const div = document.getElementById('stockList');
+    if (products.length === 0) { div.innerHTML = '<div class="empty-state">কোনো প্রোডাক্ট নেই</div>'; return; }
+    let html = '<table><thead><tr><th>প্রোডাক্ট</th><th>টাইপ</th><th>স্টক</th><th>রূপান্তর</th><th>মোট মূল্য</th><th>স্ট্যাটাস</th><th>একশন</th></tr></thead><tbody>';
+    products.forEach(p => {
+        let converted = '';
+        if (p.type === 'পলি') {
+            const bags = p.perBag > 0 ? (p.stock / p.perBag).toFixed(2) : 0;
+            converted = `${bags} বস্তা (${p.stock * p.piecesPerPoly} পিস)`;
+        } else {
+            const cartons = p.perCarton > 0 ? (p.stock / p.perCarton).toFixed(2) : 0;
+            converted = `${cartons} কার্টুন (${p.stock * p.piecesPerDojon} পিস)`;
+        }
+        const value = (p.stock * p.price).toFixed(2);
+        const status = p.stock <= 0 ? '<span class="badge badge-danger">শেষ</span>' :
+                       p.stock < 50 ? '<span class="badge badge-warning">কম</span>' :
+                       '<span class="badge badge-success">ভালো</span>';
+        html += `<tr>
+            <td><strong>${escapeHtml(p.name)}</strong></td>
+            <td>${p.type}</td>
+            <td>${p.stock} ${p.type}</td>
+            <td style="font-size:12px;">${converted}</td>
+            <td>৳${value}</td>
+            <td>${status}</td>
+            <td><button class="btn btn-success btn-sm" onclick="openRestockModal(${p.id})">📦 স্টক যোগ</button></td>
+        </tr>`;
+    });
+    html += '</tbody></table>';
+    div.innerHTML = html;
+}
+
+// ==================== PRODUCT SELECTOR (Order) ====================
+function renderProductSelector() {
+    const div = document.getElementById('productSelector');
+    if (products.length === 0) { div.innerHTML = '<div class="alert alert-info">প্রথমে "প্রোডাক্ট" ট্যাব থেকে প্রোডাক্ট যোগ করুন।</div>'; return; }
+    
+    let html = '';
+    products.forEach(p => {
+        let conversionText = '', unitOptions = '';
+        if (p.type === 'পলি') {
+            conversionText = `১ পলি = <strong>${p.piecesPerPoly} পিস</strong><br>১ বস্তা = <strong>${p.perBag} পলি</strong> = <strong>${p.perBag * p.piecesPerPoly} পিস</strong>`;
+            unitOptions = '<option value="পলি">পলি</option><option value="বস্তা">বস্তা</option>';
+        } else {
+            conversionText = `১ ডজন = <strong>${p.piecesPerDojon} পিস</strong><br>১ কার্টুন = <strong>${p.perCarton} ডজন</strong> = <strong>${p.perCarton * p.piecesPerDojon} পিস</strong>`;
+            unitOptions = '<option value="ডজন">ডজন</option><option value="কার্টুন">কার্টুন</option>';
+        }
+        html += `
+        <div class="product-card" id="card-${p.id}">
+            <div class="product-card-header">
+                <div class="product-card-title">
+                    <input type="checkbox" class="product-card-checkbox" id="chk-${p.id}" onchange="toggleProductCard(${p.id})">
+                    <span>${escapeHtml(p.name)}</span>
+                </div>
+                <span class="product-card-type ${p.type === 'ডজন' ? 'dojon' : ''}">${p.type}</span>
+            </div>
+            <div class="product-conversion-info">${conversionText}</div>
+            <div class="product-card-row">
+                <div><label class="product-card-label">ইউনিট</label>
+                    <select class="product-card-input" id="unit-${p.id}" onchange="calculateCard(${p.id})">${unitOptions}</select>
+                </div>
+                <div><label class="product-card-label">পরিমাণ</label>
+                    <input type="number" class="product-card-input" id="qty-${p.id}" min="0" value="0" onchange="calculateCard(${p.id})" oninput="calculateCard(${p.id})">
+                </div>
+            </div>
+            <div class="product-card-row">
+                <div><label class="product-card-label">একক দাম (এডিটযোগ্য)</label>
+                    <input type="number" class="product-card-input price-input" id="price-${p.id}" value="${p.price}" step="0.01" min="0" onchange="calculateCard(${p.id})" oninput="calculateCard(${p.id})">
+                </div>
+                <div><label class="product-card-label">মোট দাম</label>
+                    <input type="text" class="product-card-input total-value" id="total-${p.id}" value="৳0" readonly>
+                </div>
+            </div>
+            <div class="product-card-stock-info">
+                <span>স্টক: <strong>${p.stock} ${p.type}</strong></span>
+                <span id="pieces-${p.id}">মোট: ০ পিস</span>
+            </div>
+        </div>`;
+    });
+    div.innerHTML = html;
+}
+
+function toggleProductCard(id) {
+    const chk = document.getElementById('chk-' + id);
+    const card = document.getElementById('card-' + id);
+    if (chk.checked) card.classList.add('selected');
+    else { card.classList.remove('selected'); document.getElementById('qty-' + id).value = 0; }
+    calculateCard(id);
+}
+
+function calculateCard(id) {
+    const p = products.find(x => x.id === id);
+    if (!p) return;
+    const qty = parseFloat(document.getElementById('qty-' + id).value) || 0;
+    const unit = document.getElementById('unit-' + id).value;
+    const customPrice = parseFloat(document.getElementById('price-' + id).value) || 0;
+    
+    let totalBaseUnits = qty, totalPieces = qty;
+    if (p.type === 'পলি') {
+        if (unit === 'বস্তা') { totalBaseUnits = qty * p.perBag; totalPieces = totalBaseUnits * p.piecesPerPoly; }
+        else { totalPieces = totalBaseUnits * p.piecesPerPoly; }
+    } else {
+        if (unit === 'কার্টুন') { totalBaseUnits = qty * p.perCarton; totalPieces = totalBaseUnits * p.piecesPerDojon; }
+        else { totalPieces = totalBaseUnits * p.piecesPerDojon; }
+    }
+    const total = totalBaseUnits * customPrice;
+    document.getElementById('total-' + id).value = '৳' + total.toFixed(2);
+    document.getElementById('pieces-' + id).textContent = 'মোট: ' + totalPieces + ' পিস';
+    updateOrderSummary();
+}
+
+function updateOrderSummary() {
+    let subTotal = 0;
+    const items = [];
+    products.forEach(p => {
+        const chk = document.getElementById('chk-' + p.id);
+        if (chk && chk.checked) {
+            const qty = parseFloat(document.getElementById('qty-' + p.id).value) || 0;
+            if (qty <= 0) return;
+            const unit = document.getElementById('unit-' + p.id).value;
+            const customPrice = parseFloat(document.getElementById('price-' + p.id).value) || 0;
+            let totalBaseUnits = qty, totalPieces = qty;
+            if (p.type === 'পলি') {
+                if (unit === 'বস্তা') { totalBaseUnits = qty * p.perBag; totalPieces = totalBaseUnits * p.piecesPerPoly; }
+                else { totalPieces = totalBaseUnits * p.piecesPerPoly; }
+            } else {
+                if (unit === 'কার্টুন') { totalBaseUnits = qty * p.perCarton; totalPieces = totalBaseUnits * p.piecesPerDojon; }
+                else { totalPieces = totalBaseUnits * p.piecesPerDojon; }
+            }
+            const total = totalBaseUnits * customPrice;
+            subTotal += total;
+            items.push({ product: p, qty, unit, totalBaseUnits, totalPieces, total, customPrice });
+        }
+    });
+    currentOrderItems = items;
+    const disc = parseFloat(document.getElementById('discountInput').value) || 0;
+    const vat = parseFloat(document.getElementById('vatInput').value) || 0;
+    const afterDisc = subTotal * (1 - disc / 100);
+    const grand = afterDisc * (1 + vat / 100);
+    document.getElementById('subTotal').textContent = '৳' + subTotal.toFixed(2);
+    document.getElementById('afterDiscount').textContent = '৳' + afterDisc.toFixed(2);
+    document.getElementById('grandTotal').textContent = '৳' + grand.toFixed(2);
+    renderCurrentOrderItems();
+}
+
+function renderCurrentOrderItems() {
+    const div = document.getElementById('currentOrderItems');
+    if (currentOrderItems.length === 0) { div.innerHTML = '<div class="empty-state">এখনো কোনো আইটেম যোগ করা হয়নি</div>'; return; }
+    let html = '<table><thead><tr><th>প্রোডাক্ট</th><th>পরিমাণ</th><th>মোট</th><th>মোট পিস</th><th>একক দাম</th><th>মোট দাম</th></tr></thead><tbody>';
+    let total = 0;
+    currentOrderItems.forEach(item => {
+        total += item.total;
+        html += `<tr>
+            <td><strong>${escapeHtml(item.product.name)}</strong></td>
+            <td>${item.qty} ${item.unit}</td>
+            <td>${item.totalBaseUnits} ${item.product.type}</td>
+            <td>${item.totalPieces} পিস</td>
+            <td>৳${item.customPrice.toFixed(2)}</td>
+            <td>৳${item.total.toFixed(2)}</td>
+        </tr>`;
+    });
+    html += `<tr style="font-weight:700; background:#f0f0ff;"><td colspan="5">সাবটোটাল</td><td>৳${total.toFixed(2)}</td></tr>`;
+    html += '</tbody></table>';
+    div.innerHTML = html;
+}
+
+function saveOrder() {
+    if (currentOrderItems.length === 0) { alert('কোনো প্রোডাক্ট সিলেক্ট করা হয়নি!'); return; }
+    const customerName = document.getElementById('customerName').value.trim();
+    if (!customerName) { alert('ক্রেতার নাম দিন!'); return; }
+    for (const item of currentOrderItems) {
+        if (item.totalBaseUnits > item.product.stock) {
+            alert(`❌ ${item.product.name} এর স্টক অপর্যাপ্ত! প্রয়োজন: ${item.totalBaseUnits} ${item.product.type}, আছে: ${item.product.stock}`);
+            return;
+        }
+    }
+    const subTotal = currentOrderItems.reduce((s, i) => s + i.total, 0);
+    const disc = parseFloat(document.getElementById('discountInput').value) || 0;
+    const vat = parseFloat(document.getElementById('vatInput').value) || 0;
+    const afterDisc = subTotal * (1 - disc / 100);
+    const grand = afterDisc * (1 + vat / 100);
+    const order = {
+        id: 'ORD-' + Date.now(),
+        date: document.getElementById('orderDate').value || new Date().toISOString().split('T')[0],
+        customer: customerName,
+        phone: document.getElementById('customerPhone').value.trim(),
+        address: document.getElementById('customerAddress').value.trim(),
+        srName: userInfo.srName,
+        zoneName: userInfo.zoneName,
+        items: currentOrderItems.map(i => ({
+            productId: i.product.id, productName: i.product.name, productType: i.product.type,
+            qty: i.qty, unit: i.unit, totalBaseUnits: i.totalBaseUnits, totalPieces: i.totalPieces,
+            price: i.customPrice, originalPrice: i.product.price, total: i.total
+        })),
+        subTotal, discount: disc, vat, grandTotal: grand,
+        createdAt: new Date().toISOString()
+    };
+    currentOrderItems.forEach(item => {
+        const p = products.find(x => x.id === item.product.id);
+        if (p) p.stock -= item.totalBaseUnits;
+    });
+    orders.push(order);
+    saveData();
+    alert('✅ অর্ডার সেভ হয়েছে!');
+    resetOrderForm();
+    renderProducts();
+}
+
+function resetOrderForm() {
+    document.getElementById('customerName').value = '';
+    document.getElementById('customerPhone').value = '';
+    document.getElementById('customerAddress').value = '';
+    document.getElementById('discountInput').value = 0;
+    document.getElementById('vatInput').value = 0;
+    document.getElementById('orderDate').value = new Date().toISOString().split('T')[0];
+    currentOrderItems = [];
+    renderProductSelector();
+    updateOrderSummary();
+}
+
+// ==================== DAILY SUMMARY (on page) ====================
+function loadDailySummary() {
+    const date = document.getElementById('dailyDate').value;
+    const div = document.getElementById('dailySummaryContent');
+    if (!date) { div.innerHTML = '<div class="alert alert-info">তারিখ নির্বাচন করুন</div>'; return; }
+    const dayOrders = orders.filter(o => o.date === date);
+    if (dayOrders.length === 0) { div.innerHTML = '<div class="alert alert-info">এই তারিখে কোনো অর্ডার নেই</div>'; return; }
+    
+    const totalSales = dayOrders.reduce((s, o) => s + o.grandTotal, 0);
+    const totalPieces = dayOrders.reduce((s, o) => s + o.items.reduce((x, i) => x + (i.totalPieces || 0), 0), 0);
+    
+    let html = `<div class="summary-grid">
+        <div class="summary-item"><div class="label">মোট অর্ডার</div><div class="value">${dayOrders.length}</div></div>
+        <div class="summary-item"><div class="label">মোট বিক্রয়</div><div class="value">৳${totalSales.toFixed(2)}</div></div>
+        <div class="summary-item"><div class="label">মোট পিস বিক্রি</div><div class="value">${totalPieces}</div></div>
+    </div>`;
+    html += '<h3 style="margin-top:20px; font-size:15px;">অর্ডার তালিকা:</h3>';
+    html += '<table><thead><tr><th>অর্ডার ID</th><th>ক্রেতা</th><th>আইটেম</th><th>সাবটোটাল</th><th>সর্বমোট</th></tr></thead><tbody>';
+    dayOrders.forEach(o => {
+        html += `<tr><td>${o.id}</td><td>${escapeHtml(o.customer)}</td><td>${o.items.length} টি</td><td>৳${o.subTotal.toFixed(2)}</td><td><strong>৳${o.grandTotal.toFixed(2)}</strong></td></tr>`;
+    });
+    html += '</tbody></table>';
+    
+    const productMap = {};
+    dayOrders.forEach(o => {
+        o.items.forEach(i => {
+            if (!productMap[i.productName]) productMap[i.productName] = { total: 0, units: 0, pieces: 0, type: i.productType };
+            productMap[i.productName].total += i.total;
+            productMap[i.productName].units += i.totalBaseUnits;
+            productMap[i.productName].pieces += (i.totalPieces || 0);
+        });
+    });
+    html += '<h3 style="margin-top:20px; font-size:15px;">প্রোডাক্ট ভিত্তিক সামারি:</h3>';
+    html += '<table><thead><tr><th>প্রোডাক্ট</th><th>মোট ইউনিট</th><th>মোট পিস</th><th>মোট বিক্রয়</th></tr></thead><tbody>';
+    Object.keys(productMap).forEach(name => {
+        html += `<tr><td>${escapeHtml(name)}</td><td>${productMap[name].units} ${productMap[name].type}</td><td>${productMap[name].pieces}</td><td>৳${productMap[name].total.toFixed(2)}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    div.innerHTML = html;
+}
+
+// ==================== ALL ORDERS ====================
+function loadAllOrders() {
+    const filterDate = document.getElementById('filterDate').value;
+    const div = document.getElementById('allOrdersList');
+    let filtered = orders;
+    if (filterDate) filtered = orders.filter(o => o.date === filterDate);
+    if (filtered.length === 0) { div.innerHTML = '<div class="empty-state">কোনো অর্ডার নেই</div>'; return; }
+    
+    let html = '<table><thead><tr><th>তারিখ</th><th>অর্ডার ID</th><th>ক্রেতা</th><th>আইটেম</th><th>সর্বমোট</th><th>একশন</th></tr></thead><tbody>';
+    filtered.slice().reverse().forEach(o => {
+        html += `<tr>
+            <td>${o.date}</td><td>${o.id}</td><td>${escapeHtml(o.customer)}</td><td>${o.items.length}</td>
+            <td><strong>৳${o.grandTotal.toFixed(2)}</strong></td>
+            <td class="actions">
+                <button class="btn btn-info btn-sm" onclick="printOrderPDF('${o.id}')">🖨️</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteOrder('${o.id}')">🗑️</button>
+            </td>
+        </tr>`;
+    });
+    html += '</tbody></table>';
+    div.innerHTML = html;
+}
+
+function deleteOrder(orderId) {
+    if (!confirm('অর্ডার ডিলিট করতে চান? স্টক ফেরত দেওয়া হবে।')) return;
+    const order = orders.find(o => o.id === orderId);
+    if (order) {
+        order.items.forEach(i => {
+            const p = products.find(x => x.id === i.productId);
+            if (p) p.stock += i.totalBaseUnits;
+        });
+    }
+    orders = orders.filter(o => o.id !== orderId);
+    saveData();
+    loadAllOrders();
+    renderProducts();
+    renderStock();
+    alert('✅ অর্ডার ডিলিট হয়েছে এবং স্টক ফেরত দেওয়া হয়েছে।');
+}
+
+// ==================== USER INFO BINDING ====================
+function bindUserInfo() {
+    const srInput = document.getElementById('srName');
+    const zoneInput = document.getElementById('zoneName');
+    
+    srInput.value = userInfo.srName || '';
+    zoneInput.value = userInfo.zoneName || '';
+    
+    srInput.addEventListener('input', function() {
+        userInfo.srName = this.value;
+        saveUserInfo();
+    });
+    zoneInput.addEventListener('input', function() {
+        userInfo.zoneName = this.value;
+        saveUserInfo();
+    });
+}
+
+// ==================== INIT ====================
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('orderDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('dailyDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('discountInput').addEventListener('input', updateOrderSummary);
+    document.getElementById('vatInput').addEventListener('input', updateOrderSummary);
+    document.getElementById('restockModal').addEventListener('click', function(e) {
+        if (e.target === this) closeRestockModal();
+    });
+    document.getElementById('restockAmount').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') confirmRestock();
+    });
+    
+    bindUserInfo();
+    
+    if (products.length === 0) {
+        products = [
+            { id: 1, name: 'জিরোস ১০', type: 'পলি', piecesPerPoly: 20, perBag: 6, piecesPerDojon: 0, perCarton: 0, price: 160, stock: 98 },
+            { id: 2, name: 'জিরোস ৫', type: 'পলি', piecesPerPoly: 20, perBag: 24, piecesPerDojon: 0, perCarton: 0, price: 105, stock: 97 },
+            { id: 3, name: 'প্রাণ ম্যাংগো জুস ২০', type: 'ডজন', piecesPerPoly: 0, perBag: 0, piecesPerDojon: 12, perCarton: 2, price: 240, stock: 50 }
+        ];
+        saveData();
+    }
+    
+    toggleProductFields();
+    renderProductSelector();
+    renderProducts();
+    updateOrderSummary();
+});
+</script>
+</body>
+</html>
